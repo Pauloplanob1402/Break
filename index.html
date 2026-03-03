@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BREAK" />
+  <meta name="description" content="Quebre o Padrão. Um ritual diário de confronto." />
+  <title>BREAK — Quebre o Padrão</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Google AdSense — substitua pelo seu publisher ID -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111111;
+      --surface: #181818;
+      --surface2: #202020;
+      --text: #F2F2F2;
+      --muted: #666666;
+      --muted2: #444444;
+      --accent: #B11226;
+      --accent-dim: rgba(177,18,38,0.12);
+      --accent-glow: rgba(177,18,38,0.25);
+      --border: rgba(242,242,242,0.07);
+      --border2: rgba(242,242,242,0.12);
+      --gold: #C9963A;
+      --gold-dim: rgba(201,150,58,0.15);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+
+    #app {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 28px env(safe-area-inset-bottom, 24px);
+    }
+
+    /* ── SCREENS ── */
+    .screen { width: 100%; max-width: 420px; display: none; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+
+    /* ── LOGO ── */
+    .logo-block { text-align: center; margin-bottom: 56px; }
+    .logo {
+      font-size: clamp(52px, 14vw, 72px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .logo span { color: var(--accent); }
+    .tagline {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%;
+      padding: 18px 32px;
+      background: var(--accent);
+      color: var(--text);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { opacity: 0.72; }
+
+    .btn-ghost {
+      width: 100%;
+      padding: 18px 32px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+    .btn-gold {
+      width: 100%;
+      padding: 18px 32px;
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+    .btn-gold:hover { background: var(--gold-dim); }
+
+    /* ── ONBOARDING ── */
+    .onboard-label {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .name-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(28px, 8vw, 36px);
+      font-weight: 300;
+      padding: 12px 0 16px;
+      text-align: center;
+      outline: none;
+      margin-bottom: 48px;
+      transition: border-color 0.2s;
+      letter-spacing: -0.01em;
+    }
+    .name-input::placeholder { color: var(--muted); opacity: 0.5; }
+    .name-input:focus { border-color: var(--accent); }
+
+    /* ── DAILY SCREEN ── */
+    .day-label {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .card { width: 100%; margin-bottom: 32px; }
+
+    .card-section {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .section-text {
+      font-size: clamp(16px, 4.2vw, 19px);
+      font-weight: 300;
+      line-height: 1.58;
+      color: var(--text);
+    }
+    .section-text.lie {
+      font-size: clamp(19px, 5.2vw, 24px);
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: -0.01em;
+    }
+    .section-text.action { font-weight: 500; color: var(--text); }
+
+    .actions-row {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── FEEDBACK ── */
+    .feedback-block { width: 100%; padding: 24px 0; text-align: center; }
+    .feedback-msg {
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .feedback-msg.broke { color: var(--accent); }
+    .feedback-msg.repeated { color: var(--muted); }
+    .streak-info { font-size: 12px; color: var(--muted); margin-top: 12px; letter-spacing: 0.1em; }
+
+    /* ── DONE STATE ── */
+    .done-block { width: 100%; text-align: center; padding: 16px 0 32px; }
+    .done-status {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    .done-status.broke { color: var(--accent); border: 1px solid var(--accent-dim); }
+    .done-status.repeated { color: var(--muted); border: 1px solid var(--border); }
+    .done-next { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+
+    /* ── STREAK CHIP ── */
+    .streak-chip {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 32px;
+      min-height: 16px;
+    }
+    .streak-chip b { color: var(--accent); font-weight: 700; }
+
+    /* ── PREMIUM BADGE (chip topo quando premium) ── */
+    .premium-chip {
+      display: none;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 5px 14px;
+      margin-bottom: 28px;
+      font-weight: 600;
+    }
+    .premium-chip.visible { display: inline-block; }
+
+    /* ── ANÚNCIO ── */
+    .ad-container {
+      width: 100%;
+      margin: 8px 0 20px;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .ad-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      margin-bottom: 6px;
+      align-self: flex-start;
+    }
+    .ad-container.hidden { display: none; }
+
+    /* ── BOTÃO EXTRA BREAK (premium) ── */
+    .extra-break-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px 24px;
+      background: var(--surface2);
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+    .extra-break-btn:hover { background: var(--gold-dim); }
+    .extra-break-btn.visible { display: block; }
+
+    /* ── MODAL PREMIUM ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      width: 100%;
+      max-width: 380px;
+      padding: 40px 32px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 22px; line-height: 1;
+      padding: 4px 8px;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-icon { font-size: 32px; text-align: center; margin-bottom: 16px; }
+    .modal-title {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.02em;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .modal-title span { color: var(--gold); }
+    .modal-price {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+    .modal-price strong { color: var(--text); font-size: 26px; font-weight: 700; }
+    .modal-price small { display: block; font-size: 11px; color: var(--muted2); margin-top: 4px; }
+    .feature-list { margin-bottom: 28px; }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 400;
+      line-height: 1.4;
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .feature-check { color: var(--gold); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .btn-demo {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--muted2);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 12px;
+      margin-top: 8px;
+      transition: color 0.15s;
+    }
+    .btn-demo:hover { color: var(--muted); }
+
+    /* ── NOTIF BANNER ── */
+    .notif-banner {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .notif-banner-text {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .notif-banner-text strong { color: var(--text); display: block; margin-bottom: 2px; }
+    .btn-notif {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 8px 14px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-notif:hover { border-color: var(--accent); color: var(--accent); }
+    .notif-banner.hidden { display: none; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      opacity: 0;
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-height: 640px) {
+      #app { padding: 28px 24px; }
+      .logo-block { margin-bottom: 36px; }
+      .day-label { margin-bottom: 24px; }
+      .card-section { padding: 16px 0; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════════ SPLASH ════════════ -->
+  <div class="screen active" id="screen-splash">
+    <div class="logo-block">
+      <div class="logo">BR<span>E</span>AK</div>
+      <div class="tagline">Quebre o Padrão</div>
+    </div>
+    <button class="btn-primary" onclick="goOnboard()">Começar</button>
+  </div>
+
+  <!-- ════════════ ONBOARDING ════════════ -->
+  <div class="screen" id="screen-onboard">
+    <div class="logo-block">
+      <div class="logo">BR<span>E</span>AK</div>
+      <div class="tagline">Quebre o Padrão</div>
+    </div>
+    <div class="onboard-label">Qual é o seu nome?</div>
+    <input
+      class="name-input"
+      id="name-input"
+      type="text"
+      placeholder="Seu nome"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      maxlength="40"
+    />
+    <button class="btn-primary" onclick="saveName()">Continuar</button>
+  </div>
+
+  <!-- ════════════ DAILY ════════════ -->
+  <div class="screen" id="screen-daily">
+
+    <!-- Badge premium (só aparece se premium) -->
+    <div class="premium-chip" id="premium-chip">★ Premium</div>
+
+    <div class="day-label" id="day-label">Dia 1 fora do padrão</div>
+    <div class="streak-chip" id="streak-chip"></div>
+
+    <!-- Notificação local: banner de ativação -->
+    <div class="notif-banner" id="notif-banner">
+      <div class="notif-banner-text">
+        <strong>🔔 Lembrete diário</strong>
+        Ative para não esquecer seu BREAK.
+      </div>
+      <button class="btn-notif" onclick="requestNotifPermission()">Ativar</button>
+    </div>
+
+    <!-- Card do Break -->
+    <div class="card" id="card-content">
+      <div class="card-section">
+        <div class="section-label">A mentira</div>
+        <div class="section-text lie" id="text-mentira"></div>
+      </div>
+      <div class="card-section">
+        <div class="section-label">A verdade</div>
+        <div class="section-text" id="text-verdade"></div>
+      </div>
+      <div class="card-section">
+        <div class="section-label">A ação</div>
+        <div class="section-text action" id="text-acao"></div>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div id="action-area" class="actions-row">
+      <button class="btn-primary" onclick="markDay(true)">Eu executei</button>
+      <button class="btn-ghost" onclick="markDay(false)">Eu evitei</button>
+    </div>
+
+    <!-- Feedback animado -->
+    <div id="feedback-area" class="feedback-block" style="display:none;">
+      <div class="feedback-msg" id="feedback-msg"></div>
+      <div class="streak-info" id="feedback-streak"></div>
+    </div>
+
+    <!-- Estado "já registrado hoje" -->
+    <div id="done-area" class="done-block" style="display:none;">
+      <div class="done-status" id="done-badge"></div>
+      <div class="done-next">Próximo BREAK amanhã.</div>
+      <!-- Botão extra break (só premium) -->
+      <button class="extra-break-btn" id="btn-extra-break" onclick="loadExtraBreak()">
+        ⚡ Novo Break Agora
+      </button>
+    </div>
+
+    <!-- Banner Anúncio (oculto se premium) -->
+    <div class="ad-container" id="ad-container">
+      <div class="ad-label">Publicidade</div>
+      <ins class="adsbygoogle"
+           style="display:block;width:100%;min-height:60px;"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="0000000000"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+
+    <!-- Botão abrir modal premium -->
+    <button class="btn-gold" id="btn-upgrade" onclick="openPremiumModal()">★ Remover Anúncios — R$ 19,90</button>
+
+  </div><!-- /screen-daily -->
+
+</div><!-- /app -->
+
+<!-- ════════════ MODAL PREMIUM ════════════ -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePremiumModal()" aria-label="Fechar">✕</button>
+    <div class="modal-icon">⚡</div>
+    <div class="modal-title">BR<span>E</span>AK <span style="color:var(--gold)">Premium</span></div>
+    <div class="modal-price">
+      Acesso vitalício por<br>
+      <strong>R$ 19,90</strong>
+      <small>Pagamento único — para sempre</small>
+    </div>
+    <div class="feature-list">
+      <div class="feature-item"><span class="feature-check">✓</span> Sem anúncios para sempre</div>
+      <div class="feature-item"><span class="feature-check">✓</span> Mais de um BREAK por dia — quantos quiser</div>
+      <div class="feature-item"><span class="feature-check">✓</span> Badge <strong style="color:var(--gold)">★ Premium</strong> no app</div>
+      <div class="feature-item"><span class="feature-check">✓</span> Suporte ao projeto independente</div>
+    </div>
+    <!-- Botão de compra real — integrar com Google Play Billing ou link externo -->
+    <button class="btn-primary" onclick="handleBuyPremium()">⚡ Ativar Premium — R$ 19,90</button>
+    <button class="btn-demo" onclick="handleDemoPremium()" id="btn-demo">Ativar modo demo (teste)</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════
+   ESTADO GLOBAL
+══════════════════════════════════════ */
+const State = {
+  breaks: [],
+  currentIdx: null,
+  isPremium: false,
+  extraBreakUsedToday: false,
+  notifScheduled: false,
+};
+
+/* ══════════════════════════════════════
+   STORAGE HELPERS
+══════════════════════════════════════ */
+const LS = {
+  get: k => localStorage.getItem(k),
+  set: (k, v) => localStorage.setItem(k, v),
+  getJSON: (k, fallback) => { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } },
+};
+
+function loadState() {
+  State.isPremium = LS.get('break_premium') === 'true';
+  State.extraBreakUsedToday = LS.get('break_extra_date') === todayKey();
+  State.notifScheduled = LS.get('break_notif_ok') === 'true';
+}
+
+/* ══════════════════════════════════════
+   UTILITÁRIOS DE DATA
+══════════════════════════════════════ */
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getDayOfYear(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start + (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60000;
+  return Math.floor(diff / 86400000);
+}
+
+/* ══════════════════════════════════════
+   CARREGAMENTO DE BREAKS (Vercel/GitHub safe)
+══════════════════════════════════════ */
+async function loadBreaks() {
+  try {
+    /* Path absoluto a partir da raiz do app — funciona em Netlify, Vercel e GitHub Pages */
+    const base = window.location.pathname.endsWith('/')
+      ? window.location.pathname
+      : window.location.pathname.replace(/\/[^/]*$/, '/');
+    const url = `${base}breaks.json`;
+    const r = await fetch(url, { cache: 'default' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    State.breaks = await r.json();
+  } catch (e) {
+    console.error('[BREAK] Falha ao carregar breaks.json:', e);
+    /* Fallback mínimo para não travar */
+    State.breaks = [
+      { id: 1, mentira: "Eu não tenho tempo.", verdade: "Você priorizou outra coisa.", acao: "Execute a tarefa que está adiando." },
+      { id: 2, mentira: "Eu não estou pronto.", verdade: "Você quer garantia antes de agir.", acao: "Comece antes de se sentir pronto." },
+      { id: 3, mentira: "Eu começo segunda.", verdade: "Você quer aliviar a culpa hoje.", acao: "Dê o primeiro passo hoje." },
+    ];
+  }
+}
+
+/* ══════════════════════════════════════
+   TELAS
+══════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goOnboard() {
+  showScreen('screen-onboard');
+  setTimeout(() => document.getElementById('name-input').focus(), 200);
+}
+
+function saveName() {
+  const val = document.getElementById('name-input').value.trim();
+  if (!val) return;
+  LS.set('break_name', val);
+  if (!LS.get('break_start_day')) LS.set('break_start_day', getDayOfYear(new Date()));
+  loadDaily();
+}
+
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveName();
+});
+
+/* ══════════════════════════════════════
+   TELA DAILY
+══════════════════════════════════════ */
+function loadDaily(forceNewBreak = false) {
+  if (!State.breaks.length) return;
+
+  const today      = todayKey();
+  const lastDate   = LS.get('break_last_date');
+  const lastMark   = LS.get('break_last_mark');
+  let streak       = parseInt(LS.get('break_streak') || '0');
+
+  /* Verifica gap de streak */
+  if (lastDate && lastDate !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    if (lastDate !== yKey && lastMark === 'executed') {
+      streak = 0;
+      LS.set('break_streak', '0');
+    }
+  }
+
+  /* Escolhe o break do dia (baseado no dia do ano) */
+  const dayOfYear  = getDayOfYear(new Date());
+  State.currentIdx = forceNewBreak
+    ? Math.floor(Math.random() * State.breaks.length)
+    : (dayOfYear % State.breaks.length);
+
+  const entry = State.breaks[State.currentIdx];
+
+  /* Contador de dias no app */
+  const startDay = parseInt(LS.get('break_start_day') || dayOfYear);
+  const daysOut  = dayOfYear - startDay + 1;
+  document.getElementById('day-label').textContent = `Dia ${daysOut} fora do padrão`;
+
+  /* Streak chip */
+  const chip = document.getElementById('streak-chip');
+  chip.innerHTML = streak > 0
+    ? `<b>${streak}</b> dia${streak > 1 ? 's' : ''} consecutivo${streak > 1 ? 's' : ''}`
+    : '';
+
+  /* Conteúdo do card */
+  document.getElementById('text-mentira').textContent = entry.mentira;
+  document.getElementById('text-verdade').textContent = entry.verdade;
+  document.getElementById('text-acao').textContent    = entry.acao;
+
+  /* Atualiza UI premium */
+  updatePremiumUI();
+
+  /* Notificações */
+  updateNotifBanner();
+
+  /* Já marcou hoje? */
+  if (!forceNewBreak && lastDate === today && lastMark) {
+    showDoneState(lastMark, streak);
+  } else {
+    /* Mostra botões de ação */
+    document.getElementById('action-area').style.display = 'flex';
+    document.getElementById('feedback-area').style.display = 'none';
+    document.getElementById('done-area').style.display = 'none';
+  }
+
+  showScreen('screen-daily');
+}
+
+/* Extra break (premium) — carrega break aleatório sem marcar o dia */
+function loadExtraBreak() {
+  if (!State.isPremium) { openPremiumModal(); return; }
+  State.currentIdx = Math.floor(Math.random() * State.breaks.length);
+  const entry = State.breaks[State.currentIdx];
+  document.getElementById('text-mentira').textContent = entry.mentira;
+  document.getElementById('text-verdade').textContent = entry.verdade;
+  document.getElementById('text-acao').textContent    = entry.acao;
+  /* Reabilita botões de ação para o extra */
+  document.getElementById('action-area').style.display = 'flex';
+  document.getElementById('feedback-area').style.display = 'none';
+  document.getElementById('done-area').style.display = 'none';
+  LS.set('break_extra_date', todayKey());
+  State.extraBreakUsedToday = true;
+  showToast('Novo BREAK carregado');
+}
+
+/* ══════════════════════════════════════
+   MARCAR DIA
+══════════════════════════════════════ */
+function markDay(executed) {
+  const today    = todayKey();
+  const lastDate = LS.get('break_last_date');
+  /* Bloqueia re-marcação no mesmo dia (exceto extra break) */
+  if (lastDate === today && !State.extraBreakUsedToday) return;
+
+  let streak = parseInt(LS.get('break_streak') || '0');
+  if (executed) {
+    streak++;
+    LS.set('break_streak', streak);
+    LS.set('break_last_mark', 'executed');
+  } else {
+    streak = 0;
+    LS.set('break_streak', '0');
+    LS.set('break_last_mark', 'avoided');
+  }
+  LS.set('break_last_date', today);
+
+  /* Animação de feedback */
+  const feedEl  = document.getElementById('feedback-area');
+  const msgEl   = document.getElementById('feedback-msg');
+  const strEl   = document.getElementById('feedback-streak');
+  document.getElementById('action-area').style.display = 'none';
+
+  if (executed) {
+    msgEl.textContent = 'Padrão interrompido.';
+    msgEl.className   = 'feedback-msg broke';
+    strEl.textContent = streak > 1 ? `${streak} dias consecutivos` : '';
+  } else {
+    msgEl.textContent = 'O padrão continua.';
+    msgEl.className   = 'feedback-msg repeated';
+    strEl.textContent = '';
+  }
+
+  feedEl.style.display = 'block';
+  setTimeout(() => {
+    feedEl.style.display = 'none';
+    showDoneState(executed ? 'executed' : 'avoided', streak);
+  }, 2200);
+}
+
+function showDoneState(mark, streak) {
+  document.getElementById('action-area').style.display  = 'none';
+  document.getElementById('feedback-area').style.display = 'none';
+  const doneArea = document.getElementById('done-area');
+  const badge    = document.getElementById('done-badge');
+  const extraBtn = document.getElementById('btn-extra-break');
+
+  if (mark === 'executed') {
+    badge.textContent = streak > 1 ? `${streak} dias — padrão interrompido` : 'Padrão interrompido';
+    badge.className   = 'done-status broke';
+  } else {
+    badge.textContent = 'O padrão continua';
+    badge.className   = 'done-status repeated';
+  }
+
+  doneArea.style.display = 'block';
+
+  /* Botão extra break — só para premium que ainda não usou hoje */
+  const canExtra = State.isPremium && !State.extraBreakUsedToday;
+  extraBtn.classList.toggle('visible', canExtra);
+
+  /* Atualiza streak chip */
+  const chip = document.getElementById('streak-chip');
+  chip.innerHTML = streak > 0
+    ? `<b>${streak}</b> dia${streak > 1 ? 's' : ''} consecutivo${streak > 1 ? 's' : ''}`
+    : '';
+}
+
+/* ══════════════════════════════════════
+   PREMIUM UI
+══════════════════════════════════════ */
+function updatePremiumUI() {
+  const isPremium = State.isPremium;
+
+  /* Badge chip */
+  document.getElementById('premium-chip').classList.toggle('visible', isPremium);
+
+  /* Anúncio */
+  document.getElementById('ad-container').classList.toggle('hidden', isPremium);
+
+  /* Botão upgrade */
+  document.getElementById('btn-upgrade').style.display = isPremium ? 'none' : 'block';
+
+  /* Texto botão demo no modal */
+  const demoBtn = document.getElementById('btn-demo');
+  if (demoBtn) demoBtn.textContent = isPremium ? 'Desativar Premium (demo)' : 'Ativar modo demo (teste)';
+
+  /* Inicializa AdSense se não premium */
+  if (!isPremium) {
+    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+  }
+}
+
+/* ══════════════════════════════════════
+   MODAL PREMIUM
+══════════════════════════════════════ */
+function openPremiumModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closePremiumModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closePremiumModal();
+});
+
+function handleBuyPremium() {
+  /*
+    INTEGRAÇÃO REAL:
+    - Para Play Store via Bubblewrap/TWA: use Digital Goods API + Payment Request API
+    - Ou redirecione para link de pagamento externo (Stripe, Hotmart, etc.)
+    Exemplo de fluxo TWA:
+      const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+      const details = await service.getDetails(['break_premium_vitalicio']);
+      const request = new PaymentRequest([{ supportedMethods: 'https://play.google.com/billing',
+        data: { sku: 'break_premium_vitalicio' }}], { total: { label: 'Total', amount: { currency: 'BRL', value: '19.90' }}});
+      const result = await request.show();
+      await result.complete('success');
+      activatePremium(true);
+  */
+  showToast('Integração de pagamento em breve');
+}
+
+function handleDemoPremium() {
+  const next = !State.isPremium;
+  State.isPremium = next;
+  LS.set('break_premium', next ? 'true' : 'false');
+  updatePremiumUI();
+  closePremiumModal();
+  showToast(next ? '⚡ Premium ativado (demo)' : 'Modo free ativado');
+}
+
+/* ══════════════════════════════════════
+   NOTIFICAÇÕES LOCAIS (100% sem servidor)
+══════════════════════════════════════ */
+function updateNotifBanner() {
+  const banner = document.getElementById('notif-banner');
+  /* Esconde se já tem permissão ou foi dispensado */
+  if (Notification.permission === 'granted' || LS.get('break_notif_dismissed') === 'true') {
+    banner.classList.add('hidden');
+  } else {
+    banner.classList.remove('hidden');
+  }
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) {
+    showToast('Notificações não suportadas');
+    return;
+  }
+
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    LS.set('break_notif_ok', 'true');
+    scheduleLocalNotification();
+    document.getElementById('notif-banner').classList.add('hidden');
+    showToast('🔔 Lembrete ativado!');
+  } else {
+    LS.set('break_notif_dismissed', 'true');
+    document.getElementById('notif-banner').classList.add('hidden');
+    showToast('Você pode ativar depois nas configurações do browser');
+  }
+}
+
+function scheduleLocalNotification() {
+  /* Agenda para 8h do próximo dia usando setTimeout (funciona enquanto o SW está ativo) */
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(reg => {
+    reg.active && reg.active.postMessage({ type: 'SCHEDULE_NOTIF' });
+  });
+}
+
+/* Re-agenda notificação a cada vez que o app abre (SW cuida da entrega) */
+function tryRescheduleNotif() {
+  if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+    scheduleLocalNotification();
+  }
+}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+let _toastTimer = null;
+function showToast(msg, duration = 2600) {
+  const el = document.getElementById('toast');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  el.textContent = msg;
+  el.classList.add('show');
+  _toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+async function init() {
+  loadState();
+  await loadBreaks();
+  const name = LS.get('break_name');
+  if (!name) {
+    showScreen('screen-splash');
+  } else {
+    if (!LS.get('break_start_day')) LS.set('break_start_day', getDayOfYear(new Date()));
+    loadDaily();
+    tryRescheduleNotif();
+  }
+}
+
+init();
+
+/* Service Worker */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(console.warn);
+  });
+}
+</script>
+</body>
+</html>
